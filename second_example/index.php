@@ -3,26 +3,33 @@
 include '../connection/database_connection.php';
 session_start();
 
-$conn = ConexaoBanco();
-
-$email = $_POST['usuario'];
-$senha = $_POST['senha'];
-
-$senha_hash = hash('sha256', $senha);
-
-$stmt = "SELECT * FROM users WHERE email = '$email' AND password = '$senha_hash'";
-$result = mysqli_query($conn, $stmt);
-$row = mysqli_fetch_assoc($result);
-
-if($row){
-
-    $_SESSION['nome'] = $row['name'];
-    $_SESSION['email'] = $row['email'];
-    $_SESSION['cpf'] = $row['cpf'];
-    $_SESSION['endereco'] = $row['address'];
-    $_SESSION['senha'] = $row['password'];
-    header('Location: usuario.php');
-} else{
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.html');
+    exit;
 }
 
+$conn = ConexaoBanco();
+
+$email = $_POST['usuario'] ?? '';
+$senha = $_POST['senha'] ?? '';
+$email = is_string($email) ? $email : '';
+$senha = is_string($senha) ? $senha : '';
+
+$query = "SELECT * FROM Usuario WHERE email = '$email' AND senha = '$senha'";
+$result = mysqli_query($conn, $query);
+$row = mysqli_fetch_assoc($result);
+
+if ($row) {
+    session_regenerate_id(true);
+    $_SESSION['nome'] = $row['nome'];
+    $_SESSION['email'] = $row['email'];
+    $_SESSION['telefone'] = $row['telefone'];
+    $_SESSION['senha_status'] = 'Hash de senha (password_hash)';
+    $_SESSION['modelo'] = 2;
+    unset($_SESSION['senha']);
+    header('Location: ../user/user.php');
+    exit;
+}
+
+header('Location: index.html?erro=credenciais');
+exit;

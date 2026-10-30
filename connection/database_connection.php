@@ -11,6 +11,8 @@ function ConexaoBanco(): mysqli
       $Password = $_ENV['DB_PASSWORD'] ?? getenv('DB_PASSWORD');
       $Name = $_ENV['DB_NAME'] ?? getenv('DB_NAME');
 
-      return new mysqli(hostname: $host, username: $Username, password: $Password, database: $Name);
-}
+      $connection = new mysqli(hostname: $host, username: $Username, password: $Password, database: $Name);
+      $connection->set_charset('utf8mb4');
 
+      return $connection;
+}
